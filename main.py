@@ -217,7 +217,7 @@ def main():
                       "mouse_hide":    args.mouse_hide,
                       "wake_lock":     args.wake_lock}
 
-    print(f"Hiroba News Smart Monitor v1.1\nhttp://localhost:{args.port}")
+    print(f"Hiroba News Smart Monitor v1.1\nListening on all interfaces, port {args.port}")
     try:
         HTTPServer(("", args.port), Handler).serve_forever()
     except KeyboardInterrupt:
