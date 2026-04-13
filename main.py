@@ -193,7 +193,7 @@ def main():
     ap.add_argument("--city",         default="東京都")
     ap.add_argument("--lat",          default=35.6895, type=float)
     ap.add_argument("--lon",          default=139.6917, type=float)
-    ap.add_argument("--port",         default=8765, type=int)
+    ap.add_argument("--port",         default=8888, type=int)
     ap.add_argument("--rss",          nargs="*")
     ap.add_argument("--no-default-rss", action="store_true")
     ap.add_argument("--compact-clock", action="store_true",
@@ -217,9 +217,9 @@ def main():
                       "mouse_hide":    args.mouse_hide,
                       "wake_lock":     args.wake_lock}
 
-    print(f"Hiroba News Smart Monitor v1.1\nhttp://localhost:{args.port}")
+    print(f"Hiroba News Smart Monitor v1.1\nListening on all interfaces, port {args.port}")
     try:
-        HTTPServer(("localhost", args.port), Handler).serve_forever()
+        HTTPServer(("", args.port), Handler).serve_forever()
     except KeyboardInterrupt:
         print("\nStopped")
 
