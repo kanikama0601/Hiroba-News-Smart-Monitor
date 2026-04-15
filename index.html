@@ -51,7 +51,7 @@
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: url('/images/d5312317-10ee-4616-80c3-76cd67f594bc.jpg') no-repeat center center / cover;
+      background: rgba(0, 0, 0, 0.62) no-repeat center center / cover;
     }
 
     #bg-ov {
@@ -959,7 +959,20 @@
     const ETOS = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
     const JIKKAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 
-    // Background static - logic removed
+    async function loadBackground() {
+      const bgEl = document.getElementById('bg');
+      const remoteUrl = 'http://localhost:8000/random-image';
+
+      const img = new Image();
+      img.onload = () => {
+        bgEl.style.backgroundImage = `url('${img.src}')`;
+      };
+      img.onerror = () => {
+        // 画像が取得できない場合は背景画像を消去し、CSSで定義された黒背景を表示
+        bgEl.style.backgroundImage = 'none';
+      };
+      img.src = remoteUrl + (remoteUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    }
 
     function reiwaYear(y) { return y - 2018; }
 
@@ -1371,11 +1384,13 @@
     loadHenkou();
     loadDisaster();
     loadForex();
+    loadBackground();
     setInterval(loadWeather, 10 * 60 * 1000);
     setInterval(loadNews, 5 * 60 * 1000);
     setInterval(loadHenkou, 5 * 60 * 1000);
     setInterval(loadDisaster, 3 * 60 * 1000);
     setInterval(loadForex, 60 * 60 * 1000);
+    setInterval(loadBackground, 15 * 60 * 1000);
 
     setTimeout(() => location.reload(), 6 * 60 * 60 * 1000);
   </script>
