@@ -30,7 +30,7 @@
       --danger-bdr: rgba(255, 71, 87, 0.40);
       --safe: #2ed573;
       --ticker-h: 44px;
-      --left-w: 310px;
+      --left-w: 520px;
       --header-h: 0px;
     }
 
@@ -453,6 +453,11 @@
       gap: 10px;
     }
 
+    #disaster-bar.safe {
+      background: rgba(46, 213, 115, 0.12);
+      border-bottom-color: rgba(46, 213, 115, 0.40);
+    }
+
     .dis-icon {
       font-size: 20px;
       flex-shrink: 0;
@@ -473,8 +478,8 @@
 
     .dis-items {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .dis-item {
@@ -1121,16 +1126,24 @@
         const items = document.getElementById('disaster-items');
         const all = feeds.flatMap(f => f.items || []);
 
-        if (!all.length) {
+        // Filter by region (Kagawa/Okayama) AND title must contain 'H27' (full or half width)
+        const filtered = all.filter(it =>
+          (it.title.includes('香川県') || it.title.includes('岡山県') ||
+            it.desc.includes('香川県') || it.desc.includes('岡山県')) &&
+          (it.title.includes('H27') || it.title.includes('Ｈ２７'))
+        );
 
+        if (!filtered.length) {
           bar.classList.add('visible');
+          bar.classList.add('safe');
           bar.querySelector('.dis-icon').textContent = '✅';
-          items.innerHTML = '<span class="dis-ok">現在、発令中の緊急情報はありません</span>';
+          items.innerHTML = '<span class="dis-ok">現在、香川県・岡山県に防災情報はありません</span>';
         } else {
           bar.classList.add('visible');
+          bar.classList.remove('safe');
           bar.querySelector('.dis-icon').textContent = '🚨';
-          items.innerHTML = all.slice(0, 8).map(it =>
-            `<span class="dis-item" title="${h(it.desc)}">${h(it.title)}</span>`
+          items.innerHTML = filtered.slice(0, 8).map(it =>
+            `<div class="dis-item">${h(it.desc || it.title)}</div>`
           ).join('');
         }
       } catch {

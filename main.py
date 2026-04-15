@@ -17,7 +17,6 @@ DEFAULT_RSS_FEEDS = [
 ]
 
 DISASTER_FEEDS = [
-    {"name": "NHK 防災",     "url": "https://www3.nhk.or.jp/rss/news/cat6.xml"},
     {"name": "気象庁 緊急情報","url": "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"},
 ]
 
@@ -131,7 +130,13 @@ def fetch_rss(url, name, limit=20):
                 title = e.findtext(f"{{{ns}}}title","").strip()
                 lel   = e.find(f"{{{ns}}}link")
                 link  = lel.get("href","") if lel is not None else ""
-                summ  = re.sub(r"<[^>]+>","",e.findtext(f"{{{ns}}}summary",""))[:140].strip()
+                
+                # Try summary first, then content
+                summ = e.findtext(f"{{{ns}}}summary","")
+                if not summ:
+                    summ = e.findtext(f"{{{ns}}}content","")
+                
+                summ  = re.sub(r"<[^>]+>","", summ)[:300].strip()
                 upd   = e.findtext(f"{{{ns}}}updated","")
                 if title: items.append({"title":title,"link":link,"desc":summ,"pub":upd})
 
