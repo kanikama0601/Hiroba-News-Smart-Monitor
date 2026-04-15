@@ -558,7 +558,7 @@
       gap: 4px;
     }
 
-    .nc-link {}
+    /* .nc-link styles defined in compact-news block below */
 
     .nc:hover {
       background: var(--panel-hover);
@@ -604,6 +604,51 @@
 
     .nc-meta a {
       font-size: 12px;
+    }
+
+    /* ── henkou badges ── */
+    .hk-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      margin-bottom: 7px;
+      flex-shrink: 0;
+    }
+
+    .hk-badge.kyuko {
+      background: rgba(255, 71, 87, 0.18);
+      border: 1px solid rgba(255, 71, 87, 0.45);
+      color: #ff6b78;
+    }
+
+    .hk-badge.hoko {
+      background: rgba(46, 213, 115, 0.15);
+      border: 1px solid rgba(46, 213, 115, 0.40);
+      color: #2ed573;
+    }
+
+    .hk-badge.henkou {
+      background: rgba(255, 179, 71, 0.15);
+      border: 1px solid rgba(255, 179, 71, 0.40);
+      color: #ffb347;
+    }
+
+    .hk-meta {
+      font-size: 12px;
+      color: var(--ghost);
+      margin-top: 5px;
+      line-height: 1.6;
+    }
+
+    .hk-subject {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 4px;
     }
 
     .loader {
@@ -998,33 +1043,74 @@
       try {
         const feeds = await (await fetch('/api/news')).json();
         const all = feeds.flatMap(f => f.items || []);
-
         const tHtml = all.slice(0, 35).map(it =>
           `<span class="ti">▶ ${h(it.title)}</span>`
         ).join('<span class="ti-sep">●</span>');
         document.getElementById('ticker-inner').innerHTML = tHtml + '<span class="ti-sep">●</span>' + tHtml;
-
-        const ns = document.getElementById('news-scroll');
-        const cards = all.slice(0, 40).map(it => {
-          const titleEl = CFG.compactNews
-            ? `<div class="nc-title">${h(it.title)}</div>`
-            : `<a href="${h(it.link)}" target="_blank" rel="noopener"><div class="nc-title">${h(it.title)}</div></a>`;
-          const linkEl = it.link
-            ? `<div class="nc-link"><a href="${h(it.link)}" target="_blank" rel="noopener" style="color:var(--accent)">🔗 記事を開く</a></div>`
-            : '';
-          return `<div class="nc">
-        ${titleEl}
-        <div class="nc-desc">${h(it.desc || '')}</div>
-        <div class="nc-footer">
-          <div class="nc-meta">${h((it.pub || '').slice(0, 22))}</div>
-          ${linkEl}
-        </div>
-      </div>`;
-        }).join('');
-        ns.innerHTML = `<div class="news-grid">${cards}</div>`;
       } catch (e) {
-        document.getElementById('news-scroll').innerHTML =
-          `<div class="loader">ニュース取得失敗: ${h(e.message)}</div>`;
+        // ticker fallback
+      }
+    }
+
+    function henkouBadgeClass(type) {
+      if (type === '休講') return 'kyuko';
+      if (type === '補講') return 'hoko';
+      return 'henkou';
+    }
+
+    async function loadHenkou() {
+      const ns = document.getElementById('news-scroll');
+      try {
+        const data = await (await fetch('/api/henkou')).json();
+        if (data.error) throw new Error(data.error);
+
+        // Filter outdated data (keep today or future)
+        const todayStr = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const filteredData = data.filter(item => item['月日'] >= todayStr);
+
+        // Group by date
+        const groups = {};
+        for (const item of filteredData) {
+          const key = item['月日'];
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(item);
+        }
+
+        const DAY_JA = ['日', '月', '火', '水', '木', '金', '土'];
+        const sortedDates = Object.keys(groups).sort();
+
+        const html = sortedDates.map(dateStr => {
+          const items = groups[dateStr];
+          // Format date label
+          const dt = new Date(dateStr + 'T00:00:00+09:00');
+          const mo = dt.getMonth() + 1;
+          const dd = dt.getDate();
+          const wd = items[0]['曜日'] || DAY_JA[dt.getDay()];
+          const dateLabel = `${mo}月${dd}日（${wd}）`;
+
+          const cards = items.map(it => {
+            const type = it['変更内容'] || '';
+            const badgeCls = henkouBadgeClass(type);
+            const nensei = it['学年'] ? `${it['学年']}年` : '';
+            const klass = it['学科・クラス'] ? `${it['学科・クラス']}` : '';
+            const jigen = it['時限'] ? `第${it['時限']}限` : '';
+            const subject = it['科目(担当教員)'] || '';
+            return `<div class="nc">
+              <span class="hk-badge ${badgeCls}">${h(type)}</span>
+              <div class="hk-subject">${h(subject)}</div>
+              <div class="hk-meta">${h(nensei)} ${h(klass)}　${h(jigen)}</div>
+            </div>`;
+          }).join('');
+
+          return `<div class="feed-group">
+            <div class="feed-name">${h(dateLabel)}</div>
+            <div class="news-grid">${cards}</div>
+          </div>`;
+        }).join('');
+
+        ns.innerHTML = html || '<div class="loader">変更情報なし</div>';
+      } catch (e) {
+        ns.innerHTML = `<div class="loader">変更情報取得失敗: ${h(e.message)}</div>`;
       }
     }
 
@@ -1217,10 +1303,12 @@
 
     loadWeather();
     loadNews();
+    loadHenkou();
     loadDisaster();
     loadForex();
     setInterval(loadWeather, 10 * 60 * 1000);
     setInterval(loadNews, 5 * 60 * 1000);
+    setInterval(loadHenkou, 5 * 60 * 1000);
     setInterval(loadDisaster, 3 * 60 * 1000);
     setInterval(loadForex, 60 * 60 * 1000);
 

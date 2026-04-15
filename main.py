@@ -96,6 +96,18 @@ def fetch_weather(lat, lon, city):
     except Exception as e:
         return {"error":str(e),"city":city}
 
+def fetch_henkou():
+    url = "http://localhost:8000/henkou"
+    key = "henkou_data"
+    if c := cache_get(key): return c
+    try:
+        with urllib.request.urlopen(url, timeout=5) as r:
+            data = json.loads(r.read())
+            cache_set(key, data)
+            return data
+    except Exception as e:
+        return {"error": str(e), "items": []}
+
 def fetch_rss(url, name, limit=20):
     key = f"rss_{url}"
     if c := cache_get(key): return c
@@ -139,6 +151,7 @@ class Handler(BaseHTTPRequestHandler):
         elif p == "/api/weather":    self._json(fetch_weather(self.config["lat"],self.config["lon"],self.config["city"]))
         elif p == "/api/news":       self._json([fetch_rss(f["url"],f["name"]) for f in self.config["feeds"]])
         elif p == "/api/disaster":   self._json([fetch_rss(f["url"],f["name"],10) for f in DISASTER_FEEDS])
+        elif p == "/api/henkou":     self._json(fetch_henkou())
         elif p == "/api/images":     self._json(self._imgs())
         elif p.startswith("/images/"): self._img(p)
         else: self.send_error(404)
@@ -190,9 +203,9 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser(description="News Smart Monitor")
-    ap.add_argument("--city",         default="東京都")
-    ap.add_argument("--lat",          default=35.6895, type=float)
-    ap.add_argument("--lon",          default=139.6917, type=float)
+    ap.add_argument("--city",         default="高松市")
+    ap.add_argument("--lat",          default=34.3401, type=float)
+    ap.add_argument("--lon",          default=134.0434, type=float)
     ap.add_argument("--port",         default=8888, type=int)
     ap.add_argument("--rss",          nargs="*")
     ap.add_argument("--no-default-rss", action="store_true")
