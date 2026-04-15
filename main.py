@@ -4,7 +4,7 @@ Hiroba News Smart Monitor - run.py
 Usage: python run.py [--city CITY] [--lat LAT] [--lon LON] [--port PORT] [--rss URL ...]
 """
 
-import argparse, json, urllib.request, urllib.parse
+import argparse, json, urllib.request, urllib.parse, gzip
 import xml.etree.ElementTree as ET
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
@@ -150,6 +150,26 @@ class Handler(BaseHTTPRequestHandler):
     config = {}
     def log_message(self, *a): pass
 
+    def _send_response(self, status, content_type, body, cache_max_age=0):
+        # Apply Gzip compression if supported and beneficial
+        accept_encoding = self.headers.get("Accept-Encoding", "")
+        if "gzip" in accept_encoding and len(body) > 512:
+            body = gzip.compress(body)
+            self.send_response(status)
+            self.send_header("Content-Encoding", "gzip")
+        else:
+            self.send_response(status)
+        
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", len(body))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        if cache_max_age > 0:
+            self.send_header("Cache-Control", f"public, max-age={cache_max_age}")
+        else:
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         p = self.path.split("?")[0]
         if   p == "/":               self._html()
@@ -174,20 +194,12 @@ class Handler(BaseHTTPRequestHandler):
         if not os.path.isfile(fp): self.send_error(404); return
         mime = {".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",
                 ".webp":"image/webp",".gif":"image/gif"}.get(os.path.splitext(fn)[1].lower(),"application/octet-stream")
-        body = open(fp,"rb").read()
-        self.send_response(200)
-        self.send_header("Content-Type", mime)
-        self.send_header("Content-Length", len(body))
-        self.send_header("Cache-Control","max-age=3600")
-        self.end_headers(); self.wfile.write(body)
+        body = open(fp, "rb").read()
+        self._send_response(200, mime, body, cache_max_age=3600)
 
     def _json(self, data):
-        body = json.dumps(data, ensure_ascii=False).encode()
-        self.send_response(200)
-        self.send_header("Content-Type","application/json; charset=utf-8")
-        self.send_header("Content-Length", len(body))
-        self.send_header("Access-Control-Allow-Origin","*")
-        self.end_headers(); self.wfile.write(body)
+        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        self._send_response(200, "application/json; charset=utf-8", body)
 
     def _html(self):
         fp = os.path.join(os.path.dirname(__file__),"index.html")
@@ -201,10 +213,7 @@ class Handler(BaseHTTPRequestHandler):
         )
         html = html.replace("</head>", inject + "</head>", 1)
         body = html.encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type","text/html; charset=utf-8")
-        self.send_header("Content-Length", len(body))
-        self.end_headers(); self.wfile.write(body)
+        self._send_response(200, "text/html; charset=utf-8", body)
 
 def main():
     ap = argparse.ArgumentParser(description="News Smart Monitor")
