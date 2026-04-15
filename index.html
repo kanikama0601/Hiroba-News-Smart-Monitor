@@ -1297,6 +1297,27 @@
 
     document.querySelectorAll('.drag-scroll').forEach(enableDragScroll);
 
+    // ── auto scroll ───────────────────────────────────────────────
+    function initAutoScroll(elId) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      let pause = 0;
+      setInterval(() => {
+        if (el.classList.contains('dragging')) return;
+        if (el.scrollHeight <= el.clientHeight) return;
+        if (pause > 0) {
+          pause--;
+          return;
+        }
+        el.scrollTop += 1;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
+          el.scrollTop = 0;
+          pause = 40; // ~3s pause (80ms * 40 = 3200ms)
+        }
+      }, 80);
+    }
+    initAutoScroll('news-scroll');
+
     // ── compact-news card expand (delegate on news-scroll) ────────
     document.getElementById('news-scroll').addEventListener('click', function (e) {
       if (!CFG.compactNews) return;
