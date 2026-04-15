@@ -349,6 +349,11 @@
       padding: 6px 4px;
     }
 
+    .hc.today {
+      border-color: rgba(94, 196, 255, 0.4);
+      background: rgba(94, 196, 255, 0.15);
+    }
+
     .hc-t {
       font-size: 12px;
       color: var(--ghost);
@@ -646,7 +651,7 @@
 
     .hk-meta {
       font-size: 12px;
-      color: var(--ghost);
+      color: #fff;
       margin-top: 5px;
       line-height: 1.6;
     }
@@ -895,7 +900,7 @@
 
       <div id="clock-block">
         <div id="time-display">
-          <div style="display:flex;align-items:baseline;gap:4px"><span id="th">--</span><span
+          <div style="display:flex;align-items:baseline;gap:4px;justify-content:center"><span id="th">--</span><span
               id="time-sep">:</span><span id="tm">--</span></div>
           <div id="ts" style="font-size:0.28em;opacity:0.40;letter-spacing:2px;margin-top:2px;text-align:right">--</div>
         </div>
@@ -979,13 +984,14 @@
         document.getElementById('tm').textContent = mm;
         lastM = mm;
       }
+      const firstRun = lastS === undefined;
       if (ss !== lastS) {
         document.getElementById('ts').textContent = ss;
         document.getElementById('time-sep').style.opacity = n.getSeconds() % 2 === 0 ? '1' : '0.15';
         lastS = ss;
       }
 
-      if (ss === '00' || !lastS) {
+      if (ss === '00' || firstRun) {
         const y = n.getFullYear(), mo = n.getMonth() + 1, d = n.getDate();
         const dateStr = `${y}年 ${mo}月 ${d}日（${DAY[n.getDay()]}）`;
         const reiwaStr = `令和${reiwaYear(y)}年 / 干支 ${kanshi(y)}`;
@@ -1029,13 +1035,17 @@
         </div>
       </div>`;
 
+        const curH = new Date().getHours();
         document.getElementById('hourly-strip').innerHTML =
-          (w.hourly || []).map(x => `
-        <div class="hc">
+          (w.hourly || []).map(x => {
+            const hPart = parseInt(x.time.split(':')[0]);
+            const isNow = curH >= hPart && curH < (hPart + 3);
+            return `
+        <div class="hc${isNow ? ' today' : ''}">
           <div class="hc-t">${x.time}</div>
           <div class="hc-i">${x.icon}</div>
           <div class="hc-tp">${x.temp}°</div>
-        </div>`).join('');
+        </div>`}).join('');
 
         const lbls = ['今日', '明日', '明後日'];
         document.getElementById('forecast-list').innerHTML =
@@ -1176,7 +1186,7 @@
     const FX_PAIRS = [
       { base: 'usd', label: 'USD/JPY 米ドル/日本円' },
       { base: 'eur', label: 'EUR/JPY ユーロ/日本円' },
-      { base: 'cny', label: 'CNY/JPY 人民元/日本円' },
+      { base: 'gbp', label: 'GBP/JPY 英ポンド/日本円' },
     ];
     const fxPeriod = '1w';
     let fxData = {};

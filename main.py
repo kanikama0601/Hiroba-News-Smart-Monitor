@@ -217,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser(description="News Smart Monitor")
-    ap.add_argument("--city",         default="高松市")
+    ap.add_argument("--city",         default="金澤室 (高松市)", type=str)
     ap.add_argument("--lat",          default=34.3401, type=float)
     ap.add_argument("--lon",          default=134.0434, type=float)
     ap.add_argument("--port",         default=8888, type=int)
