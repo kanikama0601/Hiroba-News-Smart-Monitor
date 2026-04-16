@@ -1,0 +1,7 @@
+apiVersion: v2
+name: hiroba-news
+description: A hiroba news smart monitor
+
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
