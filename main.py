@@ -225,8 +225,6 @@ def main():
     ap.add_argument("--no-default-rss", action="store_true")
     ap.add_argument("--compact-clock", action="store_true",
                     help="Reduce clock font size (useful on small/Linux displays)")
-    ap.add_argument("--compact-news",  action="store_true",
-                    help="Show only news titles; click to expand detail + link")
     ap.add_argument("--mouse-hide",    action="store_true",
                     help="Hide mouse cursor (for touch-only displays)")
     ap.add_argument("--wake-lock",     action="store_true",
@@ -240,11 +238,10 @@ def main():
 
     Handler.config = {"city":args.city,"lat":args.lat,"lon":args.lon,"feeds":feeds,
                       "compact_clock": args.compact_clock,
-                      "compact_news":  args.compact_news,
                       "mouse_hide":    args.mouse_hide,
                       "wake_lock":     args.wake_lock}
 
-    print(f"Hiroba News Smart Monitor v1.1\nListening on all interfaces, port {args.port}")
+    print(f"Hiroba News Smart Monitor v1.2\nListening on all interfaces, port {args.port}")
     try:
         HTTPServer(("", args.port), Handler).serve_forever()
     except KeyboardInterrupt:

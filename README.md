@@ -1,24 +1,11 @@
 # 📡Hiroba News Smart Monitor
 
+**本ソフトは[ABATBeliever氏](https://github.com/ABATBeliever)の[Hiroba News Smart Monitor](https://github.com/ABATBeliever/Hiroba-News-Smart-Monitor)のforkです。**
+
 リアルタイムで天気・ニュース・防災情報を1画面に表示する、
 超軽量ローカル Web ダッシュボードです。  
 
 ![サンプル画像](./sample-1.1.png)
-
----
-
-## ファイル構成
-
-```
-./
-├── run.py        # バックエンドサーバー
-├── index.html    # フロントエンド
-├── README.md     # このファイル
-└── images/       # 背景画像フォルダ
-    ├── photo1.jpg
-    ├── photo2.png
-    └── ...
-```
 
 ---
 
@@ -31,8 +18,12 @@ python run.py
 ```
 python3 run.py
 ```
+または、
+```
+uv run main.py
+```
 
-ブラウザで `localhost:8765` を開くと起動します。
+ブラウザで `localhost:8888` を開くと起動します。
 
 ---
 
@@ -47,7 +38,6 @@ python3 run.py
 | `--rss URL ...` | なし | RSSフィードを追加（複数可） |
 | `--no-default-rss` | なし | デフォルトRSSを無効化 |
 | `--compact-clock` | なし | 時計フォントを縮小（時計がはみ出てしまう場合に仕様） |
-| `--compact-news` | なし | ニュースをタイトルのみ表示し、タップで詳細展開するモード |
 | `--mouse-hide` | なし | マウスカーソルを非表示にする（タッチパネル端末向け） |
 | `--wake-lock` | なし | 画面が暗くなるのをWakeLockAPIを利用し阻止するよう試行する |
 
@@ -63,11 +53,11 @@ python run.py --rss https://example.com/feed.xml
 # デフォルトRSSを無効にして独自フィードのみ
 python run.py --no-default-rss --rss https://example.com/feed.xml
 
-# タッチパネル端末向け（カーソル非表示・コンパクトニュース・画面が暗くなるのを防止するよう試行）
-python run.py --mouse-hide --compact-news --wake-lock
+# タッチパネル端末向け（カーソル非表示・画面が暗くなるのを防止するよう試行）
+python run.py --mouse-hide --wake-lock
 
 # 小型Linux端末向け（時計縮小・全オプション）
-python run.py --compact-clock --compact-news --mouse-hide
+python run.py --compact-clock --mouse-hide
 ```
 
 ### 主要都市の緯度経度
@@ -106,29 +96,30 @@ python run.py --compact-clock --compact-news --mouse-hide
 - 7日間の週間予報（最高/最低気温・降水量）— 縦ドラッグスクロール対応
 - **更新間隔：** 10分ごと
 
-### 📰 ニュースエリア（右）
+### 🗞️ニュースフィード (上)
 - **デフォルトRSS：** NHK主要・BBC日本語・CNN Japan
+- ホバーで一時停止、クリックで無効
+
+### 📅 時間割変更表示（右）
+- 電波ポータルから取得 (APIはSchedule_change_serverを使用)
 - タイル型グリッド表示、右エリアで独立スクロール（マウスドラッグ・タッチスワイプ対応）
-- 上部ティッカーに全見出しが流れる（ホバーで一時停止、クリック無効）
-- `--compact-news` 有効時：タイトルのみ表示し、タップで概要と「🔗 記事を開く」リンクを展開（カード外タップで閉じる）
+- 表示が収まらない場合は自動スクロール
 - **更新間隔：** 5分ごと
 
 ### 🚨 防災バナー（右上）
-- NHK防災RSS・気象庁緊急情報XMLを監視
+- 気象庁緊急情報XMLを監視
+- 香川県・岡山県のH27のみ取得
 - 情報あり：赤バナーでアイテム表示
-- 情報なし：緑の「発令中の緊急情報はありません」表示
+- 情報なし：緑の「現在、香川県・岡山県に防災情報はありません」表示
 - **更新間隔：** 3分ごと
 
 ### 🖼 背景画像
-- `images/` フォルダに画像を置くと自動認識
-- 対応形式：`.jpg` `.jpeg` `.png` `.webp` `.gif`
-- **30秒ごと**にランダムで切り替わる（2秒クロスフェード）
-- フォルダが空でも問題なし（暗いグラデーション背景で動作）
-
+- Schedule_change_serverを起動後、[8000番ポート](http://localhost:8000)でアップロード
+- ページ更新時にランダム取得
 
 ### 💱 為替レートエリア（ニュース上部）
 - **データソース：** [currency-api](https://github.com/fawazahmed0/exchange-api)
-- USD/JPY・EUR/JPY・CNY/JPY の3通貨を表示
+- USD/JPY・EUR/JPY・GBP/JPY の3通貨を表示
 - 現在レートと前週比（差額・変化率）をカード形式で表示
 - 上昇：緑、下落：赤で視覚的に識別
 - **更新間隔：** 1時間ごと
@@ -159,23 +150,6 @@ python run.py --compact-clock --compact-news --mouse-hide
   - `www.data.jma.go.jp`（気象庁防災情報）
   - `cdn.jsdelivr.net`（為替レート）
   - `*.currency-api.pages.dev`（為替レート・フォールバック）
-
----
-
-## 更新履歴
-
-### v1.1
-- `--compact-clock` 追加：時計フォントを縮小表示（Linux環境などで右端にはみ出る場合に有効）
-- `--compact-news` 追加：ニュースをタイトルのみ表示し、タップで詳細と記事リンクを展開するモード
-- `--mouse-hide` 追加：マウスカーソルを非表示にする（タッチパネル端末向け）
-- `--wake-lock` 追加：画面が暗くなるのをWakeLockAPIを利用し阻止するよう試行する（Chrome系ブラウザ向け）
-- マウスドラッグ・タッチスワイプによるスクロール対応（ニュースエリア・時間予報・週間予報）
-- 今日の時間別天気を週間予報エリアから独立したパネルに分離
-- ティッカー（上部ニュース帯）のクリックを無効化
-- 防災バナーのアイテムクリックを無効化
-
-### v1.0
-- 初回リリース
 
 ---
 

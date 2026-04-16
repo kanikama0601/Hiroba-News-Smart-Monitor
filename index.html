@@ -1286,7 +1286,6 @@
     // ── apply server-injected config ──────────────────────────────
     const CFG = window.MONITOR_CONFIG || {};
     if (CFG.compactClock) document.body.classList.add('compact-clock');
-    if (CFG.compactNews) document.body.classList.add('compact-news');
     if (CFG.mouseHide) document.body.classList.add('mouse-hide');
 
     // ── wake lock ─────────────────────────────────────────────────
@@ -1362,16 +1361,6 @@
     }
     initAutoScroll('news-scroll');
 
-    // ── compact-news card expand (delegate on news-scroll) ────────
-    document.getElementById('news-scroll').addEventListener('click', function (e) {
-      if (!CFG.compactNews) return;
-      const card = e.target.closest('.nc');
-      if (card) {
-        this.querySelectorAll('.nc.expanded').forEach(c => { if (c !== card) c.classList.remove('expanded'); });
-        card.classList.toggle('expanded');
-        e.stopPropagation();
-      }
-    });
     document.addEventListener('click', function (e) {
       if (!CFG.compactNews) return;
       if (!e.target.closest('#news-scroll')) {
