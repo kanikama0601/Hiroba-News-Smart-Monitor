@@ -4,11 +4,17 @@ Hiroba News Smart Monitor - run.py
 Usage: python run.py [--city CITY] [--lat LAT] [--lon LON] [--port PORT] [--rss URL ...]
 """
 
-import argparse, json, urllib.request, urllib.parse, gzip
+import argparse
+import gzip
+import json
+import os
+import re
+import threading
+import time
+import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from datetime import datetime
-import threading, time, os, re
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 DEFAULT_RSS_FEEDS = [
     {"name": "NHK 主要",     "url": "https://www3.nhk.or.jp/rss/news/cat0.xml"},
@@ -20,11 +26,14 @@ DISASTER_FEEDS = [
     {"name": "気象庁 緊急情報","url": "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"},
 ]
 
+HENKOU_API_URL = os.environ.get("HENKOU_API_URL", "http://localhost:8000/henkou")
+IMAGE_API_URL = os.environ.get("IMAGE_API_URL", "http://localhost:8000/random-image")
+
 _cache = {}
 _lock  = threading.Lock()
 CACHE_TTL = 300
 
-def cache_get(k):
+def cache_get(k: str):
     with _lock:
         e = _cache.get(k)
         if e and time.time() - e["ts"] < CACHE_TTL:
@@ -35,9 +44,10 @@ def cache_set(k, v):
     with _lock:
         _cache[k] = {"ts": time.time(), "data": v}
 
-def fetch_weather(lat, lon, city):
+def fetch_weather(lat: int, lon: int, city: str):
     key = f"wx_{lat}_{lon}"
-    if c := cache_get(key): return c
+    if c := cache_get(key): 
+        return c
     try:
         url = (f"https://api.open-meteo.com/v1/forecast"
                f"?latitude={lat}&longitude={lon}"
@@ -96,11 +106,10 @@ def fetch_weather(lat, lon, city):
         return {"error":str(e),"city":city}
 
 def fetch_henkou():
-    url = "http://localhost:8000/henkou"
     key = "henkou_data"
     if c := cache_get(key): return c
     try:
-        with urllib.request.urlopen(url, timeout=5) as r:
+        with urllib.request.urlopen(HENKOU_API_URL, timeout=5) as r:
             data = json.loads(r.read())
             cache_set(key, data)
             return data
@@ -204,6 +213,7 @@ class Handler(BaseHTTPRequestHandler):
     def _html(self):
         fp = os.path.join(os.path.dirname(__file__),"index.html")
         html = open(fp, encoding="utf-8").read()
+        html = html.replace('IMAGE_API_URL = ""', f'IMAGE_API_URL = "{IMAGE_API_URL}"')
         inject = (
             f'<script>window.MONITOR_CONFIG='
             f'{{"compactClock":{str(self.config.get("compact_clock",False)).lower()},'

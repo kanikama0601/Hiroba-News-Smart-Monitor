@@ -958,10 +958,11 @@
     const DAY = ['日', '月', '火', '水', '木', '金', '土'];
     const ETOS = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
     const JIKKAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+    const IMAGE_API_URL = "";
 
     async function loadBackground() {
       const bgEl = document.getElementById('bg');
-      const remoteUrl = 'http://localhost:8000/random-image';
+      const remoteUrl = IMAGE_API_URL;
 
       const img = new Image();
       img.onload = () => {
