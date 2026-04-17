@@ -1,0 +1,8 @@
+---
+releases:
+  - name: hiroba-news
+    namespace: hiroba-news
+    chart: ./hiroba-news
+    version: 0.1.0
+    values:
+      - ./hiroba-news/values.yaml
