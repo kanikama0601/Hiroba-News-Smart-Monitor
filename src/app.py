@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from fastapi.templating import Jinja2Templates
 
 import api
 from deps import get_settings
@@ -10,27 +10,26 @@ app = FastAPI()
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
 app.include_router(api.router)
 
-templates = Environment(
-    loader=FileSystemLoader("templates"),
-    autoescape=select_autoescape(("html", "xml")),
-)
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-async def get_index() -> HTMLResponse:
+async def get_index(req: Request) -> HTMLResponse:
     settings = get_settings()
     backend_url = settings.BACKEND_URL.rstrip("/")
-    template = templates.get_template("index.html")
-    html = template.render(
-        BACKEND_URL=backend_url,
-        MONITOR_CONFIG={
-            "compactClock": settings.COMPACT_CLOCK,
-            "compactNews": False,
-            "mouseHide": settings.MOUSE_HIDE,
-            "wakeLock": settings.WAKE_LOCK,
+    return templates.TemplateResponse(
+        request=req,
+        name="index.html",
+        context={
+            "BACKEND_URL": backend_url,
+            "MONITOR_CONFIG": {
+                "compactClock": settings.COMPACT_CLOCK,
+                "compactNews": False,
+                "mouseHide": settings.MOUSE_HIDE,
+                "wakeLock": settings.WAKE_LOCK,
+            },
         },
     )
-    return HTMLResponse(content=html)
 
 
 if __name__ == "__main__":
