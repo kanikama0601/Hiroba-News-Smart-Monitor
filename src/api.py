@@ -63,6 +63,8 @@ async def get_random_image():
                 async for chunk in resp.content.iter_chunked(1024):
                     yield chunk
 
-
-    return StreamingResponse(stream())
+    try:
+        return StreamingResponse(stream())
+    except aiohttp.ClientError as e:
+        return {"error": f"通信エラー: {str(e)}"}
 
