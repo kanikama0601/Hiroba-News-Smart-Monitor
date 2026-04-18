@@ -4,4 +4,21 @@ version = "0.1.2"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "aiocache>=0.12.3",
+    "aiohttp>=3.13.5",
+    "fastapi>=0.136.0",
+    "jinja2>=3.1.6",
+    "logging>=0.4.9.6",
+    "pydantic>=2.13.2",
+    "pydantic-settings>=2.13.1",
+    "uvicorn>=0.44.0",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportAny = false
