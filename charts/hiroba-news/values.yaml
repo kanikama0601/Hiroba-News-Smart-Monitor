@@ -14,21 +14,21 @@ hirobaNews:
     - name: BACKEND_URL
       value: "http://localhost:8888"
     - name: LATITUDE
-      value: 34.3401
+      value: "34.3401"
     - name: LONGITUDE
-      value: 134.0434
+      value: "134.0434"
     - name: CITY_NAME
       value: "高松"
     - name: PORT
-      value: 8888
+      value: "8888"
     - name: NO_DEFAULT_FEEDS
-      value: false
+      value: "false"
     - name: COMPACT_CLOCK
-      value: false
+      value: "false"
     - name: MOUSE_HIDE
-      value: false
+      value: "false"
     - name: WAKE_LOCK
-      value: false
+      value: "false"
 
   rssFeeds: []
 
