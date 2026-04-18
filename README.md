@@ -11,54 +11,27 @@
 
 ## 起動方法
 
-```
-python run.py
-```
-または、
-```
-python3 run.py
-```
-または、
-```
-uv run main.py
+```shell
+uv run src/app.py
 ```
 
 ブラウザで `localhost:8888` を開くと起動します。
 
 ---
 
-## コマンドライン引数
+## 環境変数
 
 | 引数 | デフォルト | 説明 |
 |------|-----------|------|
-| `--city` | `東京都` | 天気エリアの表示名 |
-| `--lat` | `35.6895` | 緯度 |
-| `--lon` | `139.6917` | 経度 |
-| `--port` | `8765` | ポート番号 |
-| `--rss URL ...` | なし | RSSフィードを追加（複数可） |
-| `--no-default-rss` | なし | デフォルトRSSを無効化 |
-| `--compact-clock` | なし | 時計フォントを縮小（時計がはみ出てしまう場合に仕様） |
-| `--mouse-hide` | なし | マウスカーソルを非表示にする（タッチパネル端末向け） |
-| `--wake-lock` | なし | 画面が暗くなるのをWakeLockAPIを利用し阻止するよう試行する |
+| `CITY` | `東京都` | 天気エリアの表示名 |
+| `LATITUDE` | `35.6895` | 緯度 |
+| `LONGTITUDE` | `139.6917` | 経度 |
+| `PORT` | `8765` | ポート番号 |
+| `NO_DEFAULT_RSS` | `false` | デフォルトRSSを無効化 |
+| `COMPACT_CLOCK` | `false` | 時計フォントを縮小（時計がはみ出てしまう場合に仕様） |
+| `MOUSE_HIDE` | `false` | マウスカーソルを非表示にする（タッチパネル端末向け） |
+| `WAKE_CLOCK` | `false` | 画面が暗くなるのをWakeLockAPIを利用し阻止するよう試行する |
 
-### 使用例
-
-```bash
-# 大阪・ポート8080の例
-python run.py --city 大阪 --lat 34.6937 --lon 135.5023 --port 8080
-
-# RSSフィードを追加
-python run.py --rss https://example.com/feed.xml
-
-# デフォルトRSSを無効にして独自フィードのみ
-python run.py --no-default-rss --rss https://example.com/feed.xml
-
-# タッチパネル端末向け（カーソル非表示・画面が暗くなるのを防止するよう試行）
-python run.py --mouse-hide --wake-lock
-
-# 小型Linux端末向け（時計縮小・全オプション）
-python run.py --compact-clock --mouse-hide
-```
 
 ### 主要都市の緯度経度
 
@@ -141,7 +114,7 @@ python run.py --compact-clock --mouse-hide
 ## 動作要件
 
 - **Python：** 3.8 以上
-- **外部ライブラリ：** 不要（標準ライブラリのみ）
+- **外部ライブラリ：** `fastapi`, `pydantic`, `aiohttp`, `aiocache`, `jinja2`, `uvicorn`
 - **ネットワーク：** 以下のドメインへの HTTP アクセスが必要
   - `api.open-meteo.com`（天気）
   - `www3.nhk.or.jp`（NHK RSS）
