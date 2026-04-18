@@ -87,7 +87,7 @@
     const ETOS = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
     const JIKKAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
     const BACKEND_URL = {{ BACKEND_URL | tojson }};
-    const IMAGE_API_URL = `${BACKEND_URL}/random-image`;
+    const IMAGE_API_URL = `${BACKEND_URL}/api/random-image`;
     const MONITOR_CONFIG = {{ MONITOR_CONFIG | tojson }};
 
     async function loadBackground() {

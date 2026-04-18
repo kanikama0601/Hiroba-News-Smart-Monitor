@@ -1,5 +1,7 @@
 import asyncio
+import aiohttp
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from deps import get_settings
 from external import (
@@ -49,3 +51,18 @@ async def get_disaster() -> list[RssFeed]:
 async def get_henkou() -> list[HenkouItem] | HenkouError:
     data = await fetch_henkou()
     return data
+
+
+@router.get(path="/random-image", description="ランダムな画像URLを取得します。")
+async def get_random_image():
+    url = f"{get_settings().WORKER_URL}/random-image"
+
+    async def stream():
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                async for chunk in resp.content.iter_chunked(1024):
+                    yield chunk
+
+
+    return StreamingResponse(stream())
+
