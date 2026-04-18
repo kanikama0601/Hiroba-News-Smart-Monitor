@@ -58,9 +58,11 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.env }}
+          {{- with .Values.hirobaNews }}
           env:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml .env | nindent 12 }}
+            - name: RSS_FEEDS
+              value: {{ .rssFeeds | toJson | quote }}
           {{- end }}
       {{- with .Values.volumes }}
       volumes:

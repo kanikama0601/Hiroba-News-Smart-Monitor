@@ -7,9 +7,30 @@ image:
   pullPolicy: Always
   tag: "release"
 
-env:
-  - name: IMAGE_API_URL
-    value: "http://localhost:8000/random-image"
+hirobaNews:
+  env:
+    - name: WORKER_URL
+      value: "http://localhost:8000"
+    - name: BACKEND_URL
+      value: "http://localhost:8888"
+    - name: LATITUDE
+      value: 34.3401
+    - name: LONGITUDE
+      value: 134.0434
+    - name: CITY_NAME
+      value: "高松"
+    - name: PORT
+      value: 8888
+    - name: NO_DEFAULT_FEEDS
+      value: false
+    - name: COMPACT_CLOCK
+      value: false
+    - name: MOUSE_HIDE
+      value: false
+    - name: WAKE_LOCK
+      value: false
+
+  rssFeeds: []
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
