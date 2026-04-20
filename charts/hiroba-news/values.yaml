@@ -12,7 +12,7 @@ hirobaNews:
     - name: WORKER_URL
       value: "http://hiroba-news-schedule-server:8000"
     - name: BACKEND_URL
-      value: "http://localhost:8888"
+      value: "http://192.168.11.53:8888"
     - name: LATITUDE
       value: "34.3401"
     - name: LONGITUDE
