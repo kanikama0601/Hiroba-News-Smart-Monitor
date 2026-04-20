@@ -76,7 +76,7 @@ class RssFeed(BaseModel):
     error: str | None = None
 
 
-@cached(ttl=60 * 5)
+@cached(ttl=60 * 5, skip_cache_func=lambda res: isinstance(res, WeatherError))
 async def fetch_weather(
     lat: float, lon: float, city: str
 ) -> WeatherData | WeatherError:
@@ -199,7 +199,7 @@ async def fetch_weather(
     return result
 
 
-@cached(ttl=60 * 5)
+@cached(ttl=60 * 5, skip_cache_func=lambda res: isinstance(res, HenkouError))
 async def fetch_henkou() -> list[HenkouItem] | HenkouError:
     try:
         url = f"{get_settings().WORKER_URL}/henkou"
@@ -219,7 +219,10 @@ async def fetch_henkou() -> list[HenkouItem] | HenkouError:
         )
 
 
-@cached(ttl=60 * 5)
+@cached(
+    ttl=60 * 5,
+    skip_cache_func=lambda res: isinstance(res, RssFeed) and res.error is not None,
+)
 async def fetch_rss(url: str, name: str, limit: int = 20) -> RssFeed:
     try:
         async with aiohttp.ClientSession() as session:

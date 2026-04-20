@@ -67,4 +67,3 @@ async def get_random_image():
         return StreamingResponse(stream())
     except aiohttp.ClientError as e:
         return {"error": f"通信エラー: {str(e)}"}
-

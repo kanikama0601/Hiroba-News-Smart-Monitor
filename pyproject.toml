@@ -21,3 +21,4 @@ reportMissingTypeStubs = false
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportAny = false
+reportUnknownLambdaType = false
